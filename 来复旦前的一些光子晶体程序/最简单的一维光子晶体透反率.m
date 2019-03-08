@@ -1,0 +1,23 @@
+clc,clear
+n1=2.35;
+n2=1.38;
+h1=63.8e-9;
+h2=108e-9;
+C2=[1;0];%右端的透射振幅与反射振幅
+lambda=100:1:900;
+k1=2*pi*n1./(lambda*1e-9);
+e1=k1*h1;
+k2=2*pi*n2./(lambda*1e-9);
+e2=k2*h2;
+c1=0.5*1i*(k1/k2+k2/k1);
+c2=0.5*1i*(k1/k2-k2/k1);
+num=length(lambda);
+T=zeros(1,num);%为T预分配内存
+for j=1:num
+    M1=[exp(1i*e1(j))*(cos(e2(j))+c1*sin(e2(j))),exp(-1i*(e1(j)))*(-c2*sin(e2(j)));exp(1i*e1(j))*c2*sin(e2(j)),exp(-1i*e1(j))*(cos(e2(j))-c1*sin(e2(j)))];
+    N=10;
+    M=M1^N;
+    C1=C2.*inv(M);%左端的透射振幅和反射振幅
+    T(j)=abs(C2(1)/C1(1))^2;
+end
+plot(lambda,T,'k')
