@@ -1,18 +1,20 @@
+%两个柱子的结构
 % This program could simulate the paper of Li and Zww
 clc,clear
 %paramaters
 L=100;D=2*L;h0=L/2;
 Delta=0:001:D;%The length of l_0 to the left end of A
-ne=1;%temp
-ne1=1;%slab A
+delta=30;
+ne=2;%temp
+ne1=3;%slab A
 ne2=1;%slab B
-h1=L;h2=L;
+h1=50;h2=150;
 c=3e8;
 w=0:0.001:0.6;
 k=w*1e7*ne/c;
 k1=w*1e7*ne1/c;
 k2=w*1e7*ne2/c;
-Z0=1/ne;% todo
+Z0=1;% todo
 Tc1=1+1j*tan(k*h0)/2;Tc2=1j*tan(k*h0)/2;Tc3=-1j*tan(k*h0)/2;Tc4=1-1j*tan(k*h0)/2;
 P=[1,1;1/Z0,-1/Z0];
 num1=length(w);
@@ -22,16 +24,31 @@ r1=zeros(num2,num1);Arg1=zeros(num2,num1);
 parfor n=1:num1%omega
     for m=1:num2%Delta
         Tc=[Tc1(n),Tc2(n);Tc3(n),Tc4(n)];
-        if m<num2/2
-            Th10=[exp(1j*k1(n)*Delta(m)),0;0,exp(-1j*k1(n)*Delta(m))];%todo:Th1 and Th2 will change when h0 change
-            Th11=[exp(1j*k1(n)*(h1-Delta(m))),0;0,exp(-1j*k1(n)*(h1-Delta(m)))];
-            Th2=[exp(1j*k2(n)*h2),0;0,exp(-1j*k2(n)*h2)];
-            T=Th10*Tc*Th11*Th2;
+        if m<(h1-delta)/D*num2
+            T_A1=[exp(1j*k1(n)*Delta(m)),0;0,exp(-1j*k1(n)*Delta(m))];
+            T_A2=[exp(1j*k1(n)*delta),0;0,exp(-1j*k1(n)*delta)];
+            T_A3=[exp(1j*k1(n)*(h1-Delta(m)-delta)),0;0,exp(-1j*k1(n)*(h1-Delta(m)-delta))];
+            T_B1=[exp(1j*k2(n)*h2),0;0,exp(-1j*k2(n)*h2)];
+            T=T_A1*Tc*T_A2*Tc*T_A3*T_B1;
+        elseif m>=(h1-delta)/D*num2 && m<h1/D*num2
+            T_A1=[exp(1j*k1(n)*Delta(m)),0;0,exp(-1j*k1(n)*Delta(m))];
+            T_A2=[exp(1j*k1(n)*(h1-Delta(m))),0;0,exp(-1j*k1(n)*(h1-Delta(m)))];
+            T_B1=[exp(1j*k2(n)*(delta-h1+Delta(m))),0;0,exp(-1j*k2(n)*(delta-h1+Delta(m)))];
+            T_B2=[exp(1j*k2(n)*(D-delta-Delta(m))),0;0,exp(-1j*k2(n)*(D-delta-Delta(m)))];
+            T=T_A1*Tc*T_A2*T_B1*Tc*T_B2;
+        elseif m>=h1/D*num2 && m<(D-delta)/D*num2
+            T_A1=[exp(1j*k1(n)*h1),0;0,exp(-1j*k1(n)*h1)];
+            T_B1=[exp(1j*k2(n)*(Delta(m)-h1)),0;0,exp(-1j*k2(n)*(Delta(m)-h1))];
+            T_B2=[exp(1j*k2(n)*delta),0;0,exp(-1j*k2(n)*delta)];
+            T_B3=[exp(1j*k2(n)*(D-delta-Delta(m))),0;0,exp(-1j*k2(n)*(D-delta-Delta(m)))];
+            T=T_A1*T_B1*Tc*T_B2*Tc*T_B3;
         else
-            Th1=[exp(1j*k1(n)*h1),0;0,exp(-1j*k1(n)*h1)];%todo:Th1 and Th2 will change when h0 change
-            Th20=[exp(1j*k2(n)*(Delta(m)-h1)),0;0,exp(-1j*k2(n)*(Delta(m)-h1))];
-            Th21=[exp(1j*k2(n)*(D-Delta(m))),0;0,exp(-1j*k2(n)*(D-Delta(m)))];
-            T=Th1*Th20*Tc*Th21;
+            T_A1=[exp(1j*k1(n)*(delta-D+Delta(m))),0;0,exp(-1j*k1(n)*(delta-D+Delta(m)))];
+            T_A2=[exp(1j*k1(n)*(h1-delta+D-Delta(m))),0;0,exp(-1j*k1(n)*(h1-delta+D-Delta(m)))];
+            T_B1=[exp(1j*k2(n)*(h2-D+Delta(m))),0;0,exp(-1j*k2(n)*(h2-D+Delta(m)))];
+            T_B2=[exp(1j*k2(n)*(D-Delta(m))),0;0,exp(-1j*k2(n)*(D-Delta(m)))];
+            %T=T_A1*Tc*T_A2*T_B1*Tc*T_B2;
+            T=T_A2*T_B1*Tc*T_B2*T_A1*Tc;
         end
         M=P*T*P^-1;
         Z=(M(1,1)-M(2,2)-sqrt((M(1,1)-M(2,2))^2+4*M(2,1)*M(1,2)))/(2*M(2,1));
@@ -49,7 +66,6 @@ parfor n=1:num1%omega
         Arg(m,n)=angle(-T(2,1)./T(2,2));
     end
 end
-figure
 subplot(2,2,1)
 imagesc(w,Delta,r);
 title("|r| of one cell")
