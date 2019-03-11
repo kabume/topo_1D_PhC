@@ -1,14 +1,14 @@
-%两个柱子的结构
+%model B, failed
 % This program could simulate the paper of Li and Zww
 clc,clear
 %paramaters
 L=100;D=2*L;h0=L/2;
 Delta=0:001:D;%The length of l_0 to the left end of A
-delta=30;
-ne=2;%temp
-ne1=3;%slab A
+delta=100;
+ne=3.2;%temp
+ne1=2;%slab A
 ne2=1;%slab B
-h1=50;h2=150;
+h1=100;h2=100;
 c=3e8;
 w=0:0.001:0.6;
 k=w*1e7*ne/c;
