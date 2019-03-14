@@ -1,6 +1,6 @@
-function semiinfinite(ne,k,h0,w,Delta,h1,h2)
+function semiinfinite(k,h0,w,Delta,h1,h2)
     %transfer matrix of Tc
-    Z0=1/ne;
+    Z0=377;
     Tc1=1+1j*tan(k*h0)/2;Tc2=1j*tan(k*h0)/2;Tc3=-1j*tan(k*h0)/2;Tc4=1-1j*tan(k*h0)/2;
     P=[1,1;1/Z0,-1/Z0];
     num1=length(w);
@@ -29,6 +29,7 @@ function semiinfinite(ne,k,h0,w,Delta,h1,h2)
             Arg(m,n)=angle(-T(2,1)./T(2,2));
         end
     end
+    figure
     subplot(2,2,1)
     imagesc(w,Delta,r);
     title("|r| of one cell")

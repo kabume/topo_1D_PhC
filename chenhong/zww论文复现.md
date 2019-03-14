@@ -205,86 +205,99 @@ grid on
 ```
 
 ```matlab
-%AB中加个杆。化简结果和仿真表明，r和Delta无关，Delta只和Tc的形式以及B层中的k和l有关
+%画出AB结构+共振柱的反射谱
+%提供阻抗法和布洛赫法算Arg和r
 % This program could simulate the paper of Li and Zww
 clc,clear
 %paramaters
-L=100;D=2*L;h0=L/2;
-Delta=0:001:D;%The length of l_0 to the left end of A
-ne=1;%temp
-ne1=5;%slab A
-ne2=1.5;%slab B
-h1=L;h2=L;
+da=100;db=100;D=da+db;l0=da/2;
+dx=0:0.1:D;%The length of l_0 to the left end of A
+%ne=1;%temp
+na=3.2;%slab A
+nb=1;%slab B  
+nc=2;
 c=3e8;
-w=0:0.001:0.6;
-k=w*1e7*ne/c;
-k1=w*1e7*ne1/c;
-k2=w*1e7*ne2/c;
-Z0=1/ne;% todo
-Tc1=1+1j*tan(k*h0)/2;Tc2=1j*tan(k*h0)/2;Tc3=-1j*tan(k*h0)/2;Tc4=1-1j*tan(k*h0)/2;
-P=[1,1;1/Z0,-1/Z0];
+% Z0=377;
+% P=[1,1;1/Z0,-1/Z0];
+w=0:0.001:1.6;
+ka=w*1e7*na/c;
+kb=w*1e7*nb/c;
+kc=w*1e7*nc/c;
 num1=length(w);
-num2=length(Delta);
-r=zeros(num2,num1);Arg=zeros(num2,num1);
-r1=zeros(num2,num1);Arg1=zeros(num2,num1);
-parfor n=1:num1%omega
-    for m=1:num2%Delta
-        Tc=[Tc1(n),Tc2(n);Tc3(n),Tc4(n)];
-        if m<num2/2
-            Th10=[exp(1j*k1(n)*Delta(m)),0;0,exp(-1j*k1(n)*Delta(m))];%todo:Th1 and Th2 will change when h0 change
-            Th11=[exp(1j*k1(n)*(h1-Delta(m))),0;0,exp(-1j*k1(n)*(h1-Delta(m)))];
-            Th2=[exp(1j*k2(n)*h2),0;0,exp(-1j*k2(n)*h2)];
-            T=Th10*Tc*Th11*Th2;
-        else
-            Th1=[exp(1j*k1(n)*h1),0;0,exp(-1j*k1(n)*h1)];%todo:Th1 and Th2 will change when h0 change
-            Th20=[exp(1j*k2(n)*(Delta(m)-h1)),0;0,exp(-1j*k2(n)*(Delta(m)-h1))];
-            Th21=[exp(1j*k2(n)*(D-Delta(m))),0;0,exp(-1j*k2(n)*(D-Delta(m)))];
-            T=Th1*Th20*Tc*Th21;
+num2=length(dx);
+r0=zeros(num2,num1);
+Arg=zeros(num2,num1);
+parfor nn=1:num1%omega
+    for mm=1:num2%Delta
+        if mm<db/D*num2
+%             m=[exp(1i*ka(nn)*da),exp(-1i*ka(nn)*da);ka(nn)*exp(1i*ka(nn)*da),-ka(nn)*exp(-1i*ka(nn)*da)];
+%             n=[1,1;kb(nn),-kb(nn)];%[exp(1i*kb(nn)*da),exp(-1i*kb(nn)*da);kb(nn)*exp(1i*kb(nn)*da),-kb(nn)*exp(-1i*kb(nn)*da)];
+%             o=[exp(1i*kb(nn)*(db-dx(mm))),exp(-1i*kb(nn)*(db-dx(mm)));kb(nn)*exp(1i*kb(nn)*(db-dx(mm))),-kb(nn)*exp(-1i*kb(nn)*(db-dx(mm)))];
+%             p=[1,1;kc(nn),-kc(nn)];
+%             q=[1+1i*tan(kc(nn)*l0)/2,1i*tan(kc(nn)*l0)/2;-1i*tan(kc(nn)*l0)/2,1-1i*tan(kc(nn)*l0)/2];
+%             r=[1,1;kc(nn),-kc(nn)];
+%             s=[1,1;kb(nn),-kb(nn)];
+%             t=[exp(1i*kb(nn)*dx(mm)),exp(-1i*kb(nn)*dx(mm));kb(nn)*exp(1i*kb(nn)*dx(mm)),-kb(nn)*exp(-1i*kb(nn)*dx(mm))];
+%             u=[1,1;ka(nn),-ka(nn)];
+%             T=inv(u)*t*inv(s)*r*q*inv(p)*o*inv(n)*m;
+            A=((.125*1i*kb(nn)^2*kc(nn)-.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)*exp(2*1i*kb(nn)*(db-dx(mm)))+((.25*kb(nn)*1i*ka(nn)*kc(nn)+.125*1i*kb(nn)^2*kc(nn)+.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)+.5*ka(nn)*kb(nn)^2+.25*kb(nn)^3+.25*ka(nn)^2*kb(nn))*exp(2*1i*kb(nn)*db)+(.125*1i*kb(nn)^2*kc(nn)-.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)*exp(2*1i*kb(nn)*dx(mm))+(-.25*kb(nn)*1i*ka(nn)*kc(nn)+.125*1i*kb(nn)^2*kc(nn)+.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)+.5*ka(nn)*kb(nn)^2-.25*kb(nn)^3-.25*ka(nn)^2*kb(nn))*exp(1i*(da*ka(nn)-db*kb(nn)))/(ka(nn)*kb(nn)^2);
+            B=((-.25*kb(nn)*1i*ka(nn)*kc(nn)+.125*1i*kb(nn)^2*kc(nn)+.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)*exp(2*1i*kb(nn)*(db-dx(mm)))+((.125*1i*kb(nn)^2*kc(nn)-.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)+.25*kb(nn)^3-.25*ka(nn)^2*kb(nn))*exp(2*1i*kb(nn)*db)+(.25*kb(nn)*1i*ka(nn)*kc(nn)+.125*1i*kb(nn)^2*kc(nn)+.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)*exp(2*1i*kb(nn)*dx(mm))+(.125*1i*kb(nn)^2*kc(nn)-.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)-.25*kb(nn)^3+.25*ka(nn)^2*kb(nn))*exp(-1i*(da*ka(nn)+db*kb(nn)))/(ka(nn)*kb(nn)^2); 
+            C=((-.25*kb(nn)*1i*ka(nn)*kc(nn)-.125*1i*kb(nn)^2*kc(nn)-.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)*exp(2*1i*kb(nn)*(db-dx(mm)))+((-.125*1i*kb(nn)^2*kc(nn)+.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)-.25*kb(nn)^3+.25*ka(nn)^2*kb(nn))*exp(2*1i*kb(nn)*db)+(.25*kb(nn)*1i*ka(nn)*kc(nn)-.125*1i*kb(nn)^2*kc(nn)-.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)*exp(2*1i*kb(nn)*dx(mm))+(-.125*1i*kb(nn)^2*kc(nn)+.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)+.25*kb(nn)^3-.25*ka(nn)^2*kb(nn))*exp(1i*(da*ka(nn)-db*kb(nn)))/(ka(nn)*kb(nn)^2); 
+            E=((-.125*1i*kb(nn)^2*kc(nn)+.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)*exp(2*1i*kb(nn)*(db-dx(mm)))+((.25*kb(nn)*1i*ka(nn)*kc(nn)-.125*1i*kb(nn)^2*kc(nn)-.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)+.5*ka(nn)*kb(nn)^2-.25*kb(nn)^3-.25*ka(nn)^2*kb(nn))*exp(2*1i*kb(nn)*db)+(-.125*1i*kb(nn)^2*kc(nn)+.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)*exp(2*1i*kb(nn)*dx(mm))+(-.25*kb(nn)*1i*ka(nn)*kc(nn)-.125*1i*kb(nn)^2*kc(nn)-.125*1i*ka(nn)^2*kc(nn))*tan(kc(nn)*l0)+.5*ka(nn)*kb(nn)^2+.25*kb(nn)^3+.25*ka(nn)^2*kb(nn))*exp(-1i*(da*ka(nn)+db*kb(nn)))/(ka(nn)*kb(nn)^2);
+            T=[A,B;C,E];
+        else    
+            m=[exp(1i*ka(nn)*(da+db-dx(mm))),exp(-1i*ka(nn)*(da+db-dx(mm)));ka(nn)*exp(1i*ka(nn)*(da+db-dx(mm))),-ka(nn)*exp(-1i*ka(nn)*(da+db-dx(mm)))];
+            n=[1,1;kc(nn),-kc(nn)];
+            o=[1+1i*tan(kc(nn)*l0)/2,1i*tan(kc(nn)*l0)/2;-1i*tan(kc(nn)*l0)/2,1-1i*tan(kc(nn)*l0)/2];
+            p=[1,1;kc(nn),-kc(nn)];
+            q=[1,1;ka(nn),-ka(nn)];
+            r=[exp(1i*ka(nn)*(dx(mm)-db)),exp(-1i*ka(nn)*(dx(mm)-db));ka(nn)*exp(1i*ka(nn)*(dx(mm)-db)),-ka(nn)*exp(-1i*ka(nn)*(dx(mm)-db))];
+            s=[1,1;kb(nn),-kb(nn)];
+            t=[exp(1i*kb(nn)*db),exp(-1i*kb(nn)*db);kb(nn)*exp(1i*kb(nn)*db),-kb(nn)*exp(-1i*kb(nn)*db)];
+            u=[1,1;ka(nn),-ka(nn)];
+            T=inv(u)*t*inv(s)*r*inv(q)*p*o*inv(n)*m;
         end
-        M=P*T*P^-1;
-        Z=(M(1,1)-M(2,2)-sqrt((M(1,1)-M(2,2))^2+4*M(2,1)*M(1,2)))/(2*M(2,1));
-        if real(Z)>0
-            Z=(M(1,1)-M(2,2)-sqrt((M(1,1)-M(2,2))^2+4*M(2,1)*M(1,2)))/(2*M(2,1));
-        else
-            Z=(M(1,1)-M(2,2)+sqrt((M(1,1)-M(2,2))^2+4*M(2,1)*M(1,2)))/(2*M(2,1));
+         AAA=T(1,1)+T(2,2);
+         Temp0=AAA^2-4;
+         Temp1=(AAA-sqrt(Temp0))/2;
+         r0(mm,nn)=abs((Temp1-T(1,1))/T(1,2));
+         if r0(mm,nn)<=1
+            Temp1=(AAA-sqrt(Temp0))/2;
+            r0(mm,nn)=abs((Temp1-T(1,1))/T(1,2));
+            Arg(mm,nn)=angle((Temp1-T(1,1))/T(1,2));
+         else
+            Temp1=(AAA+sqrt(Temp0))/2;
+            r0(mm,nn)=abs((Temp1-T(1,1))/T(1,2));
+            Arg(mm,nn)=angle((Temp1-T(1,1))/T(1,2));
         end
-        r1(m,n)=abs((Z-Z0)/(Z+Z0));
-        Arg1(m,n)=angle((Z-Z0)/(Z+Z0));
-%         if Arg1(m,n)<-pi+0.001&&Arg1(m,n)>-pi-0.001
-%             Arg1(m,n)=pi;
-%         end
-        r(m,n)=abs(-T(2,1)./T(2,2));
-        Arg(m,n)=angle(-T(2,1)./T(2,2));
+%        M=P*T*P^-1;
+%        Z=(M(1,1)-M(2,2)-sqrt((M(1,1)-M(2,2))^2+4*M(2,1)*M(1,2)))/(2*M(2,1));
+%        if real(Z)>=0
+%             Z=(M(1,1)-M(2,2)-sqrt((M(1,1)-M(2,2))^2+4*M(2,1)*M(1,2)))/(2*M(2,1));
+%        else
+%            Z=(M(1,1)-M(2,2)+sqrt((M(1,1)-M(2,2))^2+4*M(2,1)*M(1,2)))/(2*M(2,1));
+%        end
+%         Temp(mm,nn)=(Z-Z0)/(Z+Z0);
+%         r0(mm,nn)=abs(Temp(mm,nn));
+%         Arg(mm,nn)=angle(Temp(mm,nn));
     end
 end
-subplot(2,2,1)
-imagesc(w,Delta,r);
-title("|r| of one cell")
+figure
+imagesc(w,dx,r0);
+title("|r| of semiinfinite")
 view([-90 90]);
 box('on');
 axis('ij');
 xlabel("\omega");ylabel("\Delta");
-subplot(2,2,2)
-imagesc(w,Delta,Arg);
-title("Arg of one cell")
+figure
+imagesc(w,dx,Arg);
+title("Arg of semiinfinite")
 view([-90 90]);
 box('on');
 axis('ij');
 xlabel("\omega");ylabel("\Delta");
-subplot(2,2,3)
-imagesc(w,Delta,r1);
-title("|r| of semi-infinite systems")
-view([-90 90]);
-box('on');
-axis('ij');
-xlabel("\omega");ylabel("\Delta");
-subplot(2,2,4)
-imagesc(w,Delta,Arg1);
-title("Arg of semi-infinite systems")
-view([-90 90]);
-box('on');
-axis('ij');
-xlabel("\omega");ylabel("\Delta");
+figure
+plot(w,r0(round(50/D*num2),:))%奇异点处的反射谱[0.275,50]
 ```
 
 
@@ -313,3 +326,14 @@ xlabel("\omega");ylabel("\Delta");
   * acos一般有正数也有负数，怎么确定正负呢？比如参考文献**39**中的公式**(3)**利用$cos(nkd)$求$n$。==对于band gap图，本身就是对称的，其他的根据文献来确定正负。==
   * 如何通过传输矩阵法画场分布图？以此来确认奇对称和偶对称。==通过传输矩阵往前推，要画出无限长体系,参考CT2014PRX中的附录2画出无限长体系的第一个单元的场分布图就可以判断对称性和zak phase==
   * 如何利用公式(5)和公式(6)算出Zak phase。
+
+#### Debug
+
+$T_{li}=\left(
+\begin{array}{cccc}
+e^{jkl_i} &  0\\
+0 & e^{-jkl_i}  \\
+\end{array}
+\right) $,$i=1,2,3$分别代表A，B，C
+
+$T_{li}$的斜对角等于0，且$e^{jkl_{B_1}}e^{jkl_{B_2}}=e^{jkl_{B}}$,对于传输矩阵$T_AT_BT_C$来说，当把B层分为两段但是总长度不变时，$Z_{T_AT_BT_C}=Z_{T_{B_1}T_AT_{B_2}T_C}$。
