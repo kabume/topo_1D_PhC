@@ -1,5 +1,4 @@
 %model D,Dr.Li 's paper + 2 column
-%�ṩ�迹���Ͳ���շ���Arg��r
 % This program could simulate the paper of Li and Zww
 clc,clear
 %paramaters
@@ -10,9 +9,9 @@ na=3.2;%slab A
 nb=1;%slab B  
 nc=2;
 c=3e8;
-% Z0=377;%真空阻抗
+% Z0=377;
 % P=[1,1;1/Z0,-1/Z0];
-w=0:0.001:1.6;
+w=0:0.001:0.6;
 ka=w*1e7*na/c;
 kb=w*1e7*nb/c;
 kc=w*1e7*nc/c;
