@@ -1,28 +1,37 @@
 using Plots
 using Unicode
 using LaTeXStrings
+using SharedArrays
+using Distributed
 gr()
-da=100e-9;db=200e-9;D=da+db;l0=da;#单位m
+#pyplot()
+Arg=nothing;dx=nothing;dx0=nothing;ka=nothing;kb=nothing;kc=nothing;p11=nothing;p12=nothing;r0=nothing;rr=nothing;w=nothing;
+
+#addprocs(8)#除了第一次运行，下次运行的时候要注释掉
+
+da=100e-9;db=100e-9;D=da+db;l0=da;#单位m
 Dt=D*1e9;
-dx=0:0.1:Dt;
-dx=dx*1e-9
-na=2;#slab A
+dx0=0:0.1:Dt;
+dx=dx0*1e-9
+na=3.2;#slab A
 nb=1;#slab B
 nc=2;
 c=3e8;
-w=0.1:0.01:15;
+w=0.1:0.01:5;
 ka=w*1e15*na/c;
 kb=w*1e15*nb/c;
 kc=w*1e15*nc/c;
 num1=length(w);
 num2=length(dx);
-r0=zeros(num2,num1);
-Arg=zeros(num2,num1);
-Em=zeros(num2,num1);
-Temp2=zeros(num2,num1)+im*zeros(num2,num1);
-Threads.@threads for nn=1:num1
-#for nn=1:num1
-    for mm=1:num2
+r0 = zeros(num2,num1);
+Arg = zeros(num2,num1);
+r0 = SharedArray{Float64}(num2, num1);
+Arg = SharedArray{Float64}(num2, num1);
+R=SharedArray{Float64}(num2, num1);
+rr = CartesianIndices(size(r0));
+@sync begin#同步
+    @distributed for k in rr
+        mm,nn=k.I;
         if mm<db/D*num2
             m=[[exp(im*ka[nn]*da) exp(-im*ka[nn]*da)];[ka[nn]*exp(im*ka[nn]*da) -ka[nn]*exp(-im*ka[nn]*da)]];
             n=[[1 1];[kb[nn] -kb[nn]]];#[exp(im*kb[nn]*da),exp(-im*kb[nn]*da);kb[nn]*exp(im*kb[nn]*da),-kb[nn]*exp(-im*kb[nn]*da)];
@@ -34,6 +43,7 @@ Threads.@threads for nn=1:num1
             t=[[exp(im*kb[nn]*dx[mm]) exp(-im*kb[nn]*dx[mm])];[kb[nn]*exp(im*kb[nn]*dx[mm]) -kb[nn]*exp(-im*kb[nn]*dx[mm])]];
             u=[[1 1];[ka[nn] -ka[nn]]];
             T=inv(u)*t*inv(s)*r*q*inv(p)*o*inv(n)*m;
+            R[mm,nn]=real(T[1,2]);
         else
             m=[[exp(im*ka[nn]*(da+db-dx[mm])) exp(-im*ka[nn]*(da+db-dx[mm]))];[ka[nn]*exp(im*ka[nn]*(da+db-dx[mm])) -ka[nn]*exp(-im*ka[nn]*(da+db-dx[mm]))]];
             n=[[1 1];[kc[nn] -kc[nn]]];
@@ -45,6 +55,7 @@ Threads.@threads for nn=1:num1
             t=[[exp(im*kb[nn]*db) exp(-im*kb[nn]*db)];[kb[nn]*exp(im*kb[nn]*db) -kb[nn]*exp(-im*kb[nn]*db)]];
             u=[[1 1];[ka[nn] -ka[nn]]];
             T=inv(u)*t*inv(s)*r*inv(q)*p*o*inv(n)*m;
+            R[mm,nn]=real(T[1,2]);
         end
         AAA=T[1,1]+T[2,2];
         Temp0=AAA^2-4;
@@ -69,16 +80,24 @@ Threads.@threads for nn=1:num1
         end
     end
 end
-#heatmap(dx,w,r0')
-#savefig("lc=da反射系数.pdf")
-heatmap(dx,w,Arg')
-xlabel!("Delta(mm)")
-ylabel!("Normalized frequency")
-title!("Arg of semi-infinite system")
-#heatmap(dx,w,r0')
-#xlabel!("Delta(mm)")
-#ylabel!("Normalized frequency")
-#title!("|r| of semi-infinite system")
+function draw_figure(dx0,w,Arg,r0)
+    p11 = heatmap(dx0,w,Arg',color=:bluesreds,dpi=600,
+    title=L"Arg(r)",
+    ylabel = L"f\, (10^{15}/ 2 \pi\ Hz)",
+    xlabel = L"\Delta (nm)")
+
+    p12 = heatmap(dx0,w,r0',color=:bluesreds,dpi=600,
+    title=L"|r|",
+    xlabel = L"\Delta (nm)")
+    plot(p11,p12, layout=(1,2))
+end
+draw_figure(dx0,w,Arg,r0)
+heatmap(dx0,w,R')
+#savefig("3p2lc=da=db=100_na=3p2_nb=2_nc=1.png")
+#图片大小：pdf>>ps>svg>png
+#latex支持pdf,png,eps
+#gr支持输出pdf,ps,svg,png
+#gr🐮🍺
 
 
 #savefig("lc=da相位.pdf")
