@@ -688,9 +688,9 @@ B层中的传输矩阵
 
 1/Matrix(2, 2, [[1, 1], [ka, -ka]]) . Matrix(2, 2, [[exp(i*kb*dx), exp(-i*kb*dx)], [kb*exp(i*kb*dx), -kb*exp(-i*kb*dx)]]) . (1/Matrix(2, 2, [[1, 1], [kb, -kb]])) . Matrix(2, 2, [[1, 1], [kc, -kc]]) . Matrix(2, 2, [[1+(1/2)*i*tan(kc*l), (1/2)*i*tan(kc*l)], [-(1/2)*i*tan(kc*l), 1-(1/2)*i*tan(kc*l)]]) . (1/Matrix(2, 2, [[1, 1], [kc, -kc]])) . Matrix(2, 2, [[exp(i*kb*(db-dx)), exp(-i*kb*(db-dx))], [kb*exp(i*kb*(db-dx)), -kb*exp(-i*kb*(db-dx))]]) . (1/Matrix(2, 2, [[1, 1], [kb, -kb]])) . Matrix(2, 2, [[exp(i*ka*da), exp(-i*ka*da)], [ka*exp(i*ka*da), -ka*exp(-i*ka*da)]])
 
-* ==A层中的PCL关系式：```dx=-(-db*ka+arctan(ka*kc*tan(kc*l0)*tan(kb*db)/(ka^2*tan(kb*db)-kb^2*tan(kb*db)+kb*kc*tan(kc*l0))))/ka```==
-
-* B层中的PCLs关系式：==```tan(kb*dx)=tan(kb*(db-dx))```==
+* A层右边中的PCLs关系式：$dx = (ka * da  - c + n * pi) / 2  ka+db$
+* A层左边中的PCLs关系是：$dx = (ka * da - c - n*pi) / 2  ka​$
+* B层中的PCLs关系式：$dx = (n * pi + kb*db) / 2kb + da / 2​$
 
 simplify()进行化简
 

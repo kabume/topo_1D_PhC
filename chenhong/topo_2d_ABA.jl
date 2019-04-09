@@ -4,7 +4,7 @@ using LaTeXStrings
 using SharedArrays
 using Distributed
 gr()
-addprocs(8)  # 在Atom中，除了第一次运行，下次运行的时候要注释掉
+#addprocs(8)  # 在Atom中，除了第一次运行，下次运行的时候要注释掉
 function ABA(da, db, lc, na, nb, nc, w, dx)
     c = 3e8;
     D = da + db;
@@ -81,7 +81,8 @@ function ABA(da, db, lc, na, nb, nc, w, dx)
     end
     return r0, Arg;
 end
-function PCLS(da, db, na, nb, w, dx)
+
+function PCLs(da, db, na, nb, w, dx)
     c = 3e8;
     num1 = length(w);
     D = da + db;
@@ -89,85 +90,81 @@ function PCLS(da, db, na, nb, w, dx)
     kb = w * 1e15 * nb / c;
 
     bj = [-2*pi, -pi, pi, 2*pi];
-    Bn = SharedArray{Float64}(length(bj), length(w));
+    Bn = SharedArray{Float64}(length(w), length(bj));
     rr0 = CartesianIndices(size(Bn));
-    @sync begin#同步
-        @distributed for k in rr0
-            mm, nn=k.I;
-            Bn[mm, nn] = (((bj[mm] / kb[nn] + db) / 2) + da / 2);
-            if Bn[mm, nn] <= da/2+db && Bn[mm, nn]>=da/2
-                Bn[mm, nn] = Bn[mm, nn];
-            else
-                Bn[mm, nn] = NaN;
-            end
-        end
-    end
-    k_2 = Bn[1, 1:num1]; k_1 = Bn[2, 1:num1]; k1 = Bn[3, 1:num1]; k2 = Bn[4, 1:num1]; k0 = ones(num1) * (D / 2);
 
     c1 = atan.(.-(tan.(kb .* db) .* ka .^ (2) .+ tan.(kb .* db) .* kb .^ (2)) ./ ka ./ kb .* (ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .- (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)) ./ (2) .+ (tan.(kb .* db) .* ka .^ (2) .- tan.(kb .* db) .* kb .^ (2)) ./ ka ./ kb ./ (2), .-(ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .- (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)));
     c2 = atan.(.-(tan.(kb .* db) .* ka .^ (2) .+ tan.(kb .* db) .* kb .^ (2)) ./ ka ./ kb .* (ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)) ./ (2) .+ (tan.(kb .* db) .* ka .^ (2) .- tan.(kb .* db) .* kb .^ (2)) ./ ka ./ kb ./ (2), .-(ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)));
     c3 = atan.(.-(.-ka .^ (2) .* tan.(kb .* db) .- kb .^ (2) .* tan.(kb .* db)) ./ ka ./ kb .* (ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .- (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)) ./ (2) .+ (.-ka .^ (2) .* tan.(kb .* db) .+ kb .^ (2) .* tan.(kb .* db)) ./ ka ./ kb ./ (2), .-(ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .- (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)));
     c4 = atan.(.-(.-ka .^ (2) .* tan.(kb .* db) .- kb .^ (2) .* tan.(kb .* db)) ./ ka ./ kb .* (ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)) ./ (2) .+ (.-ka .^ (2) .* tan.(kb .* db) .+ kb .^ (2) .* tan.(kb .* db)) ./ ka ./ kb ./ (2), .-(ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)));
 
-
     aj1 = [0, pi, 2*pi, 3*pi, 4*pi];
-    An11 = SharedArray{Float64}(length(aj1), length(w));
-    An12 = SharedArray{Float64}(length(aj1), length(w));
+    An11 = SharedArray{Float64}(length(w), length(aj1));
+    An12 = SharedArray{Float64}(length(w), length(aj1));
     rr1 = CartesianIndices(size(An11));
-    @sync begin#同步
-        @distributed for k in rr1
-            mm, nn=k.I;
-            An11[mm, nn] = (ka[nn] * da - c3[nn] - aj1[mm]) / 2 / ka[nn];
-            An12[mm, nn] = (ka[nn] * da - c4[nn] - aj1[mm]) / 2 / ka[nn];
-            if An11[mm, nn] <= da/2 && An11[mm, nn] >= 0
-                An11[mm, nn] = An11[mm, nn];
-            else
-                An11[mm, nn] = NaN;
-            end
-            if An12[mm, nn] <= da/2 && An12[mm, nn] >= 0
-                An12[mm, nn] = An12[mm, nn];
-            else
-                An12[mm, nn] = NaN;
-            end
-        end
-    end
-    p110 = An11[1, 1:num1]; p111 = An11[2, 1:num1]; p112 = An11[3, 1:num1]; p113 = An11[4, 1:num1]; p114 = An11[5, 1:num1];
-    p120 = An12[1, 1:num1]; p121 = An12[2, 1:num1]; p122 = An12[3, 1:num1]; p123 = An12[4, 1:num1]; p124 = An12[5, 1:num1];
-
     aj2 = [0, pi, 2*pi, 3*pi, 4*pi];
-    An21 = SharedArray{Float64}(length(aj2), length(w));
-    An22 = SharedArray{Float64}(length(aj2), length(w));
+    An21 = SharedArray{Float64}(length(w), length(aj2));
+    An22 = SharedArray{Float64}(length(w), length(aj2));
     rr2 = CartesianIndices(size(An21));
+
     @sync begin#同步
-        @distributed for k in rr2
-            mm, nn=k.I;
-            An21[mm, nn] = (ka[nn] * da + 2 * ka[nn] * db - c1[nn] + aj2[mm]) / ka[nn] / 2;
-            An22[mm, nn] = (ka[nn] * da + 2 * ka[nn] * db - c2[nn] + aj2[mm]) / ka[nn] / 2;
-            if An21[mm,nn] > da/2+db && An21[mm,nn] < da+db
-                An21[mm, nn] = An21[mm, nn];
+        @distributed for k in rr0
+            nn, mm=k.I;
+            Bn[nn, mm] = (((bj[mm] / kb[nn] + db) / 2) + da / 2);
+            if Bn[nn, mm] <= da/2+db && Bn[nn, mm]>=da/2
+                Bn[nn, mm] = Bn[nn, mm];
             else
-                An21[mm, nn] = NaN;
+                Bn[nn, mm] = NaN;
             end
-            if An22[mm, nn] > da/2+db && An22[mm, nn] < da+db
-                An22[mm, nn] = An22[mm, nn];
+        end
+        @distributed for k in rr1
+            nn, mm=k.I;
+            An11[nn, mm] = (ka[nn] * da - c3[nn] - aj1[mm]) / 2 / ka[nn];
+            An12[nn, mm] = (ka[nn] * da - c4[nn] - aj1[mm]) / 2 / ka[nn];
+            if An11[nn, mm] <= da/2 && An11[nn, mm] >= 0
+                An11[nn, mm] = An11[nn, mm];
             else
-                An22[mm, nn] = NaN;
+                An11[nn, mm] = NaN;
+            end
+            if An12[nn, mm] <= da/2 && An12[nn, mm] >= 0
+                An12[nn, mm] = An12[nn, mm];
+            else
+                An12[nn, mm] = NaN;
+            end
+        end
+        @distributed for k in rr2
+            nn, mm=k.I;
+            An21[nn, mm] = (ka[nn] * da + 2 * ka[nn] * db - c1[nn] + aj2[mm]) / ka[nn] / 2;
+            An22[nn, mm] = (ka[nn] * da + 2 * ka[nn] * db - c2[nn] + aj2[mm]) / ka[nn] / 2;
+            if An21[nn, mm] > da/2+db && An21[nn, mm] < da+db
+                An21[nn, mm] = An21[nn, mm];
+            else
+                An21[nn, mm] = NaN;
+            end
+            if An22[nn, mm] > da/2+db && An22[nn, mm] < da+db
+                An22[nn, mm] = An22[nn, mm];
+            else
+                An22[nn, mm] = NaN;
             end
         end
     end
+    k_2 = Bn[1:num1, 1]; k_1 = Bn[1:num1, 2]; k1 = Bn[1:num1, 3]; k2 = Bn[1:num1, 4]; k0 = ones(num1) * (D / 2);
 
-    p210 = An21[1, 1:num1]; p211 = An21[2, 1:num1]; p212 = An21[3, 1:num1]; p213 = An21[4, 1:num1]; p214 = An21[5, 1:num1];
-    p220 = An22[1, 1:num1]; p221 = An22[2, 1:num1]; p222 = An22[3, 1:num1]; p223 = An22[4, 1:num1]; p224 = An22[5, 1:num1];
+    p110 = An11[1:num1, 1]; p111 = An11[1:num1, 2]; p112 = An11[1:num1, 3]; p113 = An11[1:num1, 4]; p114 = An11[1:num1, 5];
+    p120 = An12[1:num1, 1]; p121 = An12[1:num1, 2]; p122 = An12[1:num1, 3]; p123 = An12[1:num1, 4]; p124 = An12[1:num1, 5];
+
+    p210 = An21[1:num1, 1]; p211 = An21[1:num1, 2]; p212 = An21[1:num1, 3]; p213 = An21[1:num1, 4]; p214 = An21[1:num1, 5];
+    p220 = An22[1:num1, 1]; p221 = An22[1:num1, 2]; p222 = An22[1:num1, 3]; p223 = An22[1:num1, 4]; p224 = An22[1:num1, 5];
 
     dataA1 = [p110, p112, p114, p120, p122, p124];
     dataA2 = [p210, p212, p214, p220, p222, p224];
     dataB = [k0, k1, k_1, k2, k_2];
-    data = [dataA1, dataA2, dataB] * 1e9;
+    dataPCLs = [dataA1, dataA2, dataB] * 1e9;
 end
 
 # 输入参数
-Arg = nothing; dx = nothing; r0 = nothing; w = nothing; data = nothing; f1 = nothing; f2 = nothing;
-da = 100e-9; db = 100e-9; lc = da;  # 单位m
+Arg = nothing; dx = nothing; r0 = nothing; w = nothing; dataPCLs = nothing; f1 = nothing; f2 = nothing;
+da = 100e-9; db = 200e-9; lc = da / 7;  # 单位m
 na = 3.2;  # slab A
 nb = 1;  # slab B
 nc = 2;
@@ -176,18 +173,19 @@ dx = 0:0.1*1e-9:da + db;
 
 # 函数运算
 @time r0, Arg = ABA(da, db, lc, na, nb, nc, w, dx)  # 计算ABA结构+共振柱的反射系数和反射相位
-@time data = PCLS(da, db, na, nb, w, dx)　　#　计算ABA结构+共振柱的相位切割线
+@time dataPCLs = PCLs(da, db, na, nb, w, dx)　　#　计算ABA结构+共振柱的相位切割线
 
 # 画图
-heatmap(dx * 1e9, w, Arg', color = :bluesreds, dpi = 600, 
+
+heatmap(dx * 1e9, w, Arg', color = :bluesreds, dpi = 600,
 title = L"Arg(r)",
 ylabel = L"f\, (10^{15}/ 2 \pi\ Hz)",
 xlabel = L"\Delta (nm)")
-f1 = plot!(data, w, legend = :none, color = :black, line = (:dot, 1.5));
+f1 = plot!(dataPCLs, w, legend = :none, color = :black, line = (:dot, 1.5));
 
 heatmap(dx * 1e9, w, r0', color = :bluesreds, dpi=600,
 title = L"|r|",
 xlabel = L"\Delta (nm)")
-f2 = plot!(data, w, legend = :none, color = :black, line=(:dot, 1.5))
+f2 = plot!(dataPCLs, w, legend = :none, color = :black, line=(:dot, 1.5))
 
 plot(f1, f2, layout = (1, 2))

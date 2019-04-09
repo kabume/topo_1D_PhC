@@ -16,7 +16,16 @@ B=real(acos(A));
 C1=T(1,2);
 C2=exp(1i*B)-T(1,1);
 z1=0:0.01:h1;
+z2=h1:0.01:h1+h2;
+z3=h1+h2:0.01:h1+h2+h1;
 W1=C1*exp(1i*k*z1)+C2*exp(-1i*k*z1);%×îÖÕ½á¹û
+s2=Tc*Th1*[C1;C2];
+W2=s2(1)*exp(1i*k*(z2-h1))+s2(2)*exp(-1i*k*(z2-h1));
+s3=Tc*Th2*Tc*s2;
+W3=s3(1)*exp(1i*k*(z3-h1-h2))+s3(2)*exp(-1i*k*(z3-h1-h2));
 figure
 plot(z1,abs(W1));
+hold on
+plot(z2,abs(W2));
+plot(z3,abs(W3));
 grid on
