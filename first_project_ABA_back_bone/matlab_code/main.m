@@ -2,7 +2,7 @@
 % This program could simulate the paper of Li and Zww
 clc,clear
 %paramaters
-da=100e-9;db=100e-9;D=da+db;lc=da / 3;
+da=100e-9;db=100e-9;D=da+db;lc=da;
 Dt=D*1e9;
 dx0=0:0.1:Dt;
 dx=dx0*1e-9;
@@ -15,7 +15,7 @@ ka=w*1e15*na/c;
 kb=w*1e15*nb/c;
 kc=w*1e15*nc/c;
 [r0, Arg] = ABA(da, db, lc, na, nb, nc, w, dx);
-%PCLs(da, db, na, nb, w);
+PCLs(da, db, na, nb, w);
 
 
 figure

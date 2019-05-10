@@ -688,7 +688,7 @@ B层中的传输矩阵
 
 1/Matrix(2, 2, [[1, 1], [ka, -ka]]) . Matrix(2, 2, [[exp(i*kb*dx), exp(-i*kb*dx)], [kb*exp(i*kb*dx), -kb*exp(-i*kb*dx)]]) . (1/Matrix(2, 2, [[1, 1], [kb, -kb]])) . Matrix(2, 2, [[1, 1], [kc, -kc]]) . Matrix(2, 2, [[1+(1/2)*i*tan(kc*l), (1/2)*i*tan(kc*l)], [-(1/2)*i*tan(kc*l), 1-(1/2)*i*tan(kc*l)]]) . (1/Matrix(2, 2, [[1, 1], [kc, -kc]])) . Matrix(2, 2, [[exp(i*kb*(db-dx)), exp(-i*kb*(db-dx))], [kb*exp(i*kb*(db-dx)), -kb*exp(-i*kb*(db-dx))]]) . (1/Matrix(2, 2, [[1, 1], [kb, -kb]])) . Matrix(2, 2, [[exp(i*ka*da), exp(-i*ka*da)], [ka*exp(i*ka*da), -ka*exp(-i*ka*da)]])
 
-* A层右边中的PCLs关系式：$dx = (ka * da  - c + n * pi) / 2  ka+db$
+* A层右边中的PCLs关系式：$dx = (ka * da  - c + n * pi) / 2  ka+db​$
 * A层左边中的PCLs关系是：$dx = (ka * da - c - n*pi) / 2  ka​$
 * B层中的PCLs关系式：$dx = (n * pi + kb*db) / 2kb + da / 2​$
 
@@ -698,3 +698,102 @@ A层中的传输矩阵
 
 1/Matrix(2, 2, [[1, 1], [ka, -ka]]) . Matrix(2, 2, [[exp(i*kb*db), exp(-i*kb*db)], [kb*exp(i*kb*db), -kb*exp(-i*kb*db)]]) . (1/Matrix(2, 2, [[1, 1], [kb, -kb]])) . Matrix(2, 2, [[exp(i*ka*(dx-db)), exp(-i*ka*(dx-db))], [ka*exp(i*ka*(dx-db)), -ka*exp(-i*ka*(dx-db))]]) . (1/Matrix(2, 2, [[1, 1], [ka, -ka]])) . Matrix(2, 2, [[1, 1], [kc, -kc]]) . Matrix(2, 2, [[1+(1/2)*i*tan(kc*l), (1/2)*i*tan(kc*l)], [-(1/2)*i*tan(kc*l), 1-(1/2)*i*tan(kc*l)]]) . (1/Matrix(2, 2, [[1, 1], [kc, -kc]])) . Matrix(2, 2, [[exp(i*ka*(da+db-dx)), exp(-i*ka*(da+db-dx))], [ka*exp(i*ka*(da+db-dx)), -ka*exp(-i*ka*(da+db-dx))]])
 
+
+$$
+\frac{1}{8k a^{2} k b \cos (k_c 1_c)}\left[k_c \sin (k_c 1_c)(k_a-k_b)^{2} \sin (k_a d_a-k_b d_b-2 k_a \Delta)
+-k_c \sin (k_c 1_c)(k_a+k_b)^2 \sin (k_a d_a+k_b d_b-2 k_a \Delta)-2k_c \sin (k_c 1_c)(k_a^2-k_b^2) \sin (k_b d_b)\right]
+$$
+
+$$
+\frac{1}{8k_a^{2} k_b \cos (k_c 1_c)}\left[(k_c \sin (k_c l_c)(k_a-k_b)^{2} \cos (k_a d_a-k_b d_b-2 k_a \Delta)+k_c \sin (k_c 1_c)(k_a+k_b)^2 \cos (k_a d_a+k_b d_b-2  k_a  \Delta-4k_a\cos (k_c 1_c)(k_a^2-k_b^2) \sin (k_b d_b))\right]
+$$
+
+$$C_1 = \arctan \left( -1/2\,{\frac { \left( -{{\it ka}}^{2}\tan \left( {\it 
+
+db}\,{\it kb} \right) -{{\it kb}}^{2}\tan \left( {\it db}\,{\it kb}
+
+ \right)  \right)  \left( {{\it ka}}^{4} \left( \tan \left( {\it db}\,
+
+{\it kb} \right)  \right) ^{2}-{{\it kb}}^{4} \left( \tan \left( {\it 
+
+db}\,{\it kb} \right)  \right) ^{2}-4\, \sqrt{ \left( \tan \left( {
+
+\it db}\,{\it kb} \right)  \right) ^{2}{{\it ka}}^{4}{{\it kb}}^{4}+{{
+
+\it ka}}^{4}{{\it kb}}^{4}} \right) }{{\it ka}\,{\it kb}\, \left( {{
+
+\it ka}}^{4} \left( \tan \left( {\it db}\,{\it kb} \right)  \right) ^{
+
+2}+2\,{{\it ka}}^{2}{{\it kb}}^{2} \left( \tan \left( {\it db}\,{\it 
+
+kb} \right)  \right) ^{2}+{{\it kb}}^{4} \left( \tan \left( {\it db}\,
+
+{\it kb} \right)  \right) ^{2}+4\,{{\it ka}}^{2}{{\it kb}}^{2}
+
+ \right) }}+1/2\,{\frac {-{{\it ka}}^{2}\tan \left( {\it db}\,{\it kb}
+
+ \right) +{{\it kb}}^{2}\tan \left( {\it db}\,{\it kb} \right) }{{\it 
+
+kb}\,{\it ka}}},-{\frac {{{\it ka}}^{4} \left( \tan \left( {\it db}\,{
+
+\it kb} \right)  \right) ^{2}-{{\it kb}}^{4} \left( \tan \left( {\it 
+
+db}\,{\it kb} \right)  \right) ^{2}-4\, \sqrt{ \left( \tan \left( {
+
+\it db}\,{\it kb} \right)  \right) ^{2}{{\it ka}}^{4}{{\it kb}}^{4}+{{
+
+\it ka}}^{4}{{\it kb}}^{4}}}{{{\it ka}}^{4} \left( \tan \left( {\it db
+
+}\,{\it kb} \right)  \right) ^{2}+2\,{{\it ka}}^{2}{{\it kb}}^{2}
+
+ \left( \tan \left( {\it db}\,{\it kb} \right)  \right) ^{2}+{{\it kb}
+
+}^{4} \left( \tan \left( {\it db}\,{\it kb} \right)  \right) ^{2}+4\,{
+
+{\it ka}}^{2}{{\it kb}}^{2}}} \right) $$
+
+
+
+$$C_2 = \arctan \left( -1/2\,{\frac { \left( -{{\it ka}}^{2}\tan \left( {\it 
+
+db}\,{\it kb} \right) -{{\it kb}}^{2}\tan \left( {\it db}\,{\it kb}
+
+ \right)  \right)  \left( {{\it ka}}^{4} \left( \tan \left( {\it db}\,
+
+{\it kb} \right)  \right) ^{2}-{{\it kb}}^{4} \left( \tan \left( {\it 
+
+db}\,{\it kb} \right)  \right) ^{2}+4\, \sqrt{ \left( \tan \left( {
+
+\it db}\,{\it kb} \right)  \right) ^{2}{{\it ka}}^{4}{{\it kb}}^{4}+{{
+
+\it ka}}^{4}{{\it kb}}^{4}} \right) }{{\it ka}\,{\it kb}\, \left( {{
+
+\it ka}}^{4} \left( \tan \left( {\it db}\,{\it kb} \right)  \right) ^{
+
+2}+2\,{{\it ka}}^{2}{{\it kb}}^{2} \left( \tan \left( {\it db}\,{\it 
+
+kb} \right)  \right) ^{2}+{{\it kb}}^{4} \left( \tan \left( {\it db}\,
+
+{\it kb} \right)  \right) ^{2}+4\,{{\it ka}}^{2}{{\it kb}}^{2}
+
+ \right) }}+1/2\,{\frac {-{{\it ka}}^{2}\tan \left( {\it db}\,{\it kb}
+
+ \right) +{{\it kb}}^{2}\tan \left( {\it db}\,{\it kb} \right) }{{\it 
+
+kb}\,{\it ka}}},-{\frac {{{\it ka}}^{4} \left( \tan \left( {\it db}\,{
+
+\it kb} \right)  \right) ^{2}-{{\it kb}}^{4} \left( \tan \left( {\it 
+
+db}\,{\it kb} \right)  \right) ^{2}+4\, \sqrt{ \left( \tan \left( {
+
+\it db}\,{\it kb} \right)  \right) ^{2}{{\it ka}}^{4}{{\it kb}}^{4}+{{
+
+\it ka}}^{4}{{\it kb}}^{4}}}{{{\it ka}}^{4} \left( \tan \left( {\it db
+
+}\,{\it kb} \right)  \right) ^{2}+2\,{{\it ka}}^{2}{{\it kb}}^{2}
+
+ \left( \tan \left( {\it db}\,{\it kb} \right)  \right) ^{2}+{{\it kb}
+
+}^{4} \left( \tan \left( {\it db}\,{\it kb} \right)  \right) ^{2}+4\,{
+
+{\it ka}}^{2}{{\it kb}}^{2}}} \right) $$

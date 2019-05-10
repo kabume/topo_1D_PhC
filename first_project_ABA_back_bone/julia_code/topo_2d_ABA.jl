@@ -3,15 +3,18 @@ using Plots
 using LaTeXStrings
 using SharedArrays
 using Distributed
-plotlyjs()
-#gr
+#plotlyjs()
+gr()
 addprocs(72)  # 在Atom中，除了第一次运行，下次运行的时候要注释掉
-function ABA(da, db, lc, na, nb, nc, w, dx)
+function ABA(da, db, lc, na, nb, nc, w, dx, yeta)
     c = 3e8;
     D = da + db;
     ka = w * 1e15 * na / c;
     kb = w * 1e15 * nb / c;
     kc = w * 1e15 * nc / c;
+    ω₀ = c * pi / (2 * nc * lc);
+    Δω = w .- ω₀;
+
     num1 = length(w);
     num2 = length(dx);
     r0 = SharedArray{Float64}(num2, num1);
@@ -23,7 +26,8 @@ function ABA(da, db, lc, na, nb, nc, w, dx)
             if mm < da / 2D * num2
                 m = [exp(im*ka[nn]*dx[mm]) exp(-im*ka[nn]*dx[mm]); ka[nn]*exp(im*ka[nn]*dx[mm]) -ka[nn]*exp(-im*ka[nn]*dx[mm])];
                 n = [1 1; kc[nn] -kc[nn]];
-                o = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
+                o = [1+im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+                #o = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
                 p = [1 1; kc[nn] -kc[nn]];
                 q = [1 1; ka[nn] -ka[nn]];
                 r = [exp(im*ka[nn]*(da/2-dx[mm])) exp(-im*ka[nn]*(da/2-dx[mm])); ka[nn]*exp(im*ka[nn]*(da/2-dx[mm])) -ka[nn]*exp(-im*ka[nn]*(da/2-dx[mm]))];
@@ -37,7 +41,8 @@ function ABA(da, db, lc, na, nb, nc, w, dx)
                 n = [1 1; kb[nn] -kb[nn]];
                 o = [exp(im*kb[nn]*(dx[mm]-da/2)) exp(-im*kb[nn]*(dx[mm]-da/2)); kb[nn]*exp(im*kb[nn]*(dx[mm]-da/2)) -kb[nn]*exp(-im*kb[nn]*(dx[mm]-da/2))];
                 p = [1 1;kc[nn] -kc[nn]];
-                q = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
+                q = [1+im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+                #q = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
                 r = [1 1; kc[nn] -kc[nn]];
                 s = [1 1; kb[nn] -kb[nn]];
                 t = [exp(im*kb[nn]*(D-dx[mm]-da/2)) exp(-im*kb[nn]*(D-dx[mm]-da/2)); kb[nn]*exp(im*kb[nn]*(D-dx[mm]-da/2)) -kb[nn]*exp(-im*kb[nn]*(D-dx[mm]-da/2))];
@@ -51,7 +56,8 @@ function ABA(da, db, lc, na, nb, nc, w, dx)
                 p = [1 1; ka[nn] -ka[nn]];
                 q = [exp(im*ka[nn]*(dx[mm]-da/2-db)) exp(-im*ka[nn]*(dx[mm]-da/2-db)); ka[nn]*exp(im*ka[nn]*(dx[mm]-da/2-db)) -ka[nn]*exp(-im*ka[nn]*(dx[mm]-da/2-db))];
                 r = [1 1; kc[nn] -kc[nn]];
-                s = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
+                s = [1+im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+                #s = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
                 t = [1 1; kc[nn] -kc[nn]];
                 u = [1 1; ka[nn] -ka[nn]];
                 v = [exp(im*ka[nn]*(D-dx[mm])) 0; 0 exp(-im*ka[nn]*(D-dx[mm]))];
@@ -82,6 +88,168 @@ function ABA(da, db, lc, na, nb, nc, w, dx)
     end
     return r0, Arg;
 end
+#=
+function interface(da, db, lc1, lc2, na, nb, nc, w, dx, yeta)
+    c = 3e8;
+    D = da + db;
+    ka = w * 1e15 * na / c;
+    kb = w * 1e15 * nb / c;
+    kc = w * 1e15 * nc / c;
+    ω₀ = c * pi / (2 * nc * lc1);
+    Δω = w .- ω₀;
+
+    num1 = length(w);
+    num2 = length(dx);
+    r0 = SharedArray{Float64}(num2, num1);
+    Arg = SharedArray{Float64}(num2, num1);
+    rr = CartesianIndices(size(r0));
+    @sync begin#同步
+        @distributed for nn = 1:num1
+            if dx < da / 2
+                m = [exp(im*ka[nn]*dx) exp(-im*ka[nn]*dx); ka[nn]*exp(im*ka[nn]*dx) -ka[nn]*exp(-im*ka[nn]*dx)];
+                n = [1 1; kc[nn] -kc[nn]];
+                o = [1+im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+                #o = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
+                p = [1 1; kc[nn] -kc[nn]];
+                q = [1 1; ka[nn] -ka[nn]];
+                r = [exp(im*ka[nn]*(da/2-dx)) exp(-im*ka[nn]*(da/2-dx)); ka[nn]*exp(im*ka[nn]*(da/2-dx)) -ka[nn]*exp(-im*ka[nn]*(da/2-dx))];
+                s = [1 1; kb[nn] -kb[nn]];
+                t = [exp(im*kb[nn]*db) exp(-im*kb[nn]*db); kb[nn]*exp(im*kb[nn]*db) -kb[nn]*exp(-im*kb[nn]*db)];
+                u = [1 1; ka[nn] -ka[nn]];
+                v = [exp(im*ka[nn]*da/2) 0; 0 exp(-im*ka[nn]*da/2)];
+                T11 = v * inv(u) * t * inv(s) * r * inv(q) * p * o * inv(n) * m;
+            elseif dx >= da/2 && dx < (da/2+db)
+                m = [exp(im*ka[nn]*da/2) exp(-im*ka[nn]*da/2); ka[nn]*exp(im*ka[nn]*da/2) -ka[nn]*exp(-im*ka[nn]*da/2)];
+                n = [1 1; kb[nn] -kb[nn]];
+                o = [exp(im*kb[nn]*(dx-da/2)) exp(-im*kb[nn]*(dx-da/2)); kb[nn]*exp(im*kb[nn]*(dx-da/2)) -kb[nn]*exp(-im*kb[nn]*(dx-da/2))];
+                p = [1 1;kc[nn] -kc[nn]];
+                q = [1+im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+                #q = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
+                r = [1 1; kc[nn] -kc[nn]];
+                s = [1 1; kb[nn] -kb[nn]];
+                t = [exp(im*kb[nn]*(D-dx-da/2)) exp(-im*kb[nn]*(D-dx-da/2)); kb[nn]*exp(im*kb[nn]*(D-dx-da/2)) -kb[nn]*exp(-im*kb[nn]*(D-dx-da/2))];
+                u = [1 1; ka[nn] -ka[nn]];
+                v = [exp(im*ka[nn]*da/2) 0; 0 exp(-im*ka[nn]*da/2)];
+                T11 = v * inv(u) * t * inv(s) * r * q * inv(p) * o * inv(n) * m;
+            else
+                m = [exp(im*ka[nn]*da/2) exp(-im*ka[nn]*da/2); ka[nn]*exp(im*ka[nn]*da/2) -ka[nn]*exp(-im*ka[nn]*da/2)];
+                n = [1 1; kb[nn] -kb[nn]];
+                o = [exp(im*kb[nn]*db) exp(-im*kb[nn]*db); kb[nn]*exp(im*kb[nn]*db) -kb[nn]*exp(-im*kb[nn]*db)];
+                p = [1 1; ka[nn] -ka[nn]];
+                q = [exp(im*ka[nn]*(dx-da/2-db)) exp(-im*ka[nn]*(dx-da/2-db)); ka[nn]*exp(im*ka[nn]*(dx-da/2-db)) -ka[nn]*exp(-im*ka[nn]*(dx-da/2-db))];
+                r = [1 1; kc[nn] -kc[nn]];
+                s = [1+im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc1)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+                #s = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
+                t = [1 1; kc[nn] -kc[nn]];
+                u = [1 1; ka[nn] -ka[nn]];
+                v = [exp(im*ka[nn]*(D-dx)) 0; 0 exp(-im*ka[nn]*(D-dx))];
+                T11 = v * inv(u) * t * s * inv(r) * q * inv(p) * o * inv(n) * m;
+            end
+            T1 = T11^100;
+            #T = T11^100;
+            if dx < da / 2
+                m = [exp(im*ka[nn]*dx) exp(-im*ka[nn]*dx); ka[nn]*exp(im*ka[nn]*dx) -ka[nn]*exp(-im*ka[nn]*dx)];
+                n = [1 1; kc[nn] -kc[nn]];
+                o = [1+im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+                #o = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
+                p = [1 1; kc[nn] -kc[nn]];
+                q = [1 1; ka[nn] -ka[nn]];
+                r = [exp(im*ka[nn]*(da/2-dx)) exp(-im*ka[nn]*(da/2-dx)); ka[nn]*exp(im*ka[nn]*(da/2-dx)) -ka[nn]*exp(-im*ka[nn]*(da/2-dx))];
+                s = [1 1; kb[nn] -kb[nn]];
+                t = [exp(im*kb[nn]*db) exp(-im*kb[nn]*db); kb[nn]*exp(im*kb[nn]*db) -kb[nn]*exp(-im*kb[nn]*db)];
+                u = [1 1; ka[nn] -ka[nn]];
+                v = [exp(im*ka[nn]*da/2) 0; 0 exp(-im*ka[nn]*da/2)];
+                T22 = v * inv(u) * t * inv(s) * r * inv(q) * p * o * inv(n) * m;
+            elseif dx >= da/2 && dx < (da/2+db)
+                m = [exp(im*ka[nn]*da/2) exp(-im*ka[nn]*da/2); ka[nn]*exp(im*ka[nn]*da/2) -ka[nn]*exp(-im*ka[nn]*da/2)];
+                n = [1 1; kb[nn] -kb[nn]];
+                o = [exp(im*kb[nn]*(dx-da/2)) exp(-im*kb[nn]*(dx-da/2)); kb[nn]*exp(im*kb[nn]*(dx-da/2)) -kb[nn]*exp(-im*kb[nn]*(dx-da/2))];
+                p = [1 1;kc[nn] -kc[nn]];
+                q = [1+im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+                #q = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
+                r = [1 1; kc[nn] -kc[nn]];
+                s = [1 1; kb[nn] -kb[nn]];
+                t = [exp(im*kb[nn]*(D-dx-da/2)) exp(-im*kb[nn]*(D-dx-da/2)); kb[nn]*exp(im*kb[nn]*(D-dx-da/2)) -kb[nn]*exp(-im*kb[nn]*(D-dx-da/2))];
+                u = [1 1; ka[nn] -ka[nn]];
+                v = [exp(im*ka[nn]*da/2) 0; 0 exp(-im*ka[nn]*da/2)];
+                T22 = v * inv(u) * t * inv(s) * r * q * inv(p) * o * inv(n) * m;
+            else
+                m = [exp(im*ka[nn]*da/2) exp(-im*ka[nn]*da/2); ka[nn]*exp(im*ka[nn]*da/2) -ka[nn]*exp(-im*ka[nn]*da/2)];
+                n = [1 1; kb[nn] -kb[nn]];
+                o = [exp(im*kb[nn]*db) exp(-im*kb[nn]*db); kb[nn]*exp(im*kb[nn]*db) -kb[nn]*exp(-im*kb[nn]*db)];
+                p = [1 1; ka[nn] -ka[nn]];
+                q = [exp(im*ka[nn]*(dx-da/2-db)) exp(-im*ka[nn]*(dx-da/2-db)); ka[nn]*exp(im*ka[nn]*(dx-da/2-db)) -ka[nn]*exp(-im*ka[nn]*(dx-da/2-db))];
+                r = [1 1; kc[nn] -kc[nn]];
+                s = [1+im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc2)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+                #s = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
+                t = [1 1; kc[nn] -kc[nn]];
+                u = [1 1; ka[nn] -ka[nn]];
+                v = [exp(im*ka[nn]*(D-dx)) 0; 0 exp(-im*ka[nn]*(D-dx))];
+                T22 = v * inv(u) * t * s * inv(r) * q * inv(p) * o * inv(n) * m;
+            end
+            T2 = T22^100;
+            #T = T22^100;
+            T = T2 * T1;
+            r0[nn] = abs(-T[2,1]./T[2,2]);
+            Arg[nn] = angle(-T[2,1]./T[2,2]);
+        end
+    end
+    return r0, Arg;
+end
+=#
+function interface(da, db, lc, na, nb, nc, w, dx, yeta)
+    c = 3e8;
+    D = da + db;
+    ka = w * 1e15 * na / c;
+    kb = w * 1e15 * nb / c;
+    kc = w * 1e15 * nc / c;
+    ω₀ = c * pi / (2 * nc * lc);
+    Δω = w .- ω₀;
+
+    num1 = length(w);
+    num2 = length(dx);
+    r0 = SharedArray{Float64}(num2, num1);
+    Arg = SharedArray{Float64}(num2, num1);
+    rr = CartesianIndices(size(r0));
+    @sync begin#同步
+        @distributed for nn = 1:num1
+            m = [exp(im*ka[nn]*da/2) exp(-im*ka[nn]*da/2); ka[nn]*exp(im*ka[nn]*da/2) -ka[nn]*exp(-im*ka[nn]*da/2)];
+            n = [1 1; kb[nn] -kb[nn]];
+            o = [exp(im*kb[nn]*(dx-da/2)) exp(-im*kb[nn]*(dx-da/2)); kb[nn]*exp(im*kb[nn]*(dx-da/2)) -kb[nn]*exp(-im*kb[nn]*(dx-da/2))];
+            p = [1 1;kc[nn] -kc[nn]];
+            q = [1+im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+            #q = [1+im*tan(kc[nn]*lc)/2 im*tan(kc[nn]*lc)/2; -im*tan(kc[nn]*lc)/2 1-im*tan(kc[nn]*lc)/2];
+            r = [1 1; kc[nn] -kc[nn]];
+            s = [1 1; kb[nn] -kb[nn]];
+            t = [exp(im*kb[nn]*(D-dx-da/2)) exp(-im*kb[nn]*(D-dx-da/2)); kb[nn]*exp(im*kb[nn]*(D-dx-da/2)) -kb[nn]*exp(-im*kb[nn]*(D-dx-da/2))];
+            u = [1 1; ka[nn] -ka[nn]];
+            v = [exp(im*ka[nn]*da/2) 0; 0 exp(-im*ka[nn]*da/2)];
+            T11 = v * inv(u) * t * inv(s) * r * q * inv(p) * o * inv(n) * m;
+
+            T1 = T11^10;
+            #T = T11^100;
+
+            m = [1+im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15); -im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15) 1-im*tan(kc[nn]*lc)*Δω[nn]/2/(Δω[nn]+im*yeta*w[nn]*1e15)];
+            n = [1 1; kc[nn] -kc[nn]];
+            o = [1 1; kb[nn] -kb[nn]];
+            p = [exp(im*kb[nn]*(D-dx-db/2)) exp(-im*kb[nn]*(D-dx-db/2)); kb[nn]*exp(im*kb[nn]*(D-dx-db/2)) -kb[nn]*exp(-im*kb[nn]*(D-dx-db/2))];
+            q = [1 1; ka[nn] -ka[nn]];
+            r = [exp(im*ka[nn]*da) exp(-im*ka[nn]*da); ka[nn]*exp(im*ka[nn]*da) -ka[nn]*exp(-im*ka[nn]*da)];
+            s = [1 1; kb[nn] -kb[nn]];
+            t = [exp(im*kb[nn]*(dx-db/2)) exp(-im*kb[nn]*(dx-db/2)); kb[nn]*exp(im*kb[nn]*(dx-db/2)) -kb[nn]*exp(-im*kb[nn]*(dx-db/2))];
+            u = [1 1;kc[nn] -kc[nn]];
+            T22 = inv(u) * t * inv(s) * r * inv(q) * p * inv(o) * n * m;
+
+            T2 = T22^10;
+            #T = T22^100;
+            #T = T2 * inv(n) * T1;
+            T = T2 * T1
+            r0[nn] = abs(-T[2,1]./T[2,2]);
+            Arg[nn] = angle(-T[2,1]./T[2,2]);
+        end
+    end
+    return r0, Arg;
+end
 
 function PCLs(da, db, na, nb, w, dx)
     c = 3e8;
@@ -99,11 +267,11 @@ function PCLs(da, db, na, nb, w, dx)
     c3 = atan.(.-(.-ka .^ (2) .* tan.(kb .* db) .- kb .^ (2) .* tan.(kb .* db)) ./ ka ./ kb .* (ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .- (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)) ./ (2) .+ (.-ka .^ (2) .* tan.(kb .* db) .+ kb .^ (2) .* tan.(kb .* db)) ./ ka ./ kb ./ (2), .-(ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .- (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)));
     c4 = atan.(.-(.-ka .^ (2) .* tan.(kb .* db) .- kb .^ (2) .* tan.(kb .* db)) ./ ka ./ kb .* (ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)) ./ (2) .+ (.-ka .^ (2) .* tan.(kb .* db) .+ kb .^ (2) .* tan.(kb .* db)) ./ ka ./ kb ./ (2), .-(ka .^ (4) .* tan.(kb .* db) .^ (2) .- kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* sqrt.(tan.(kb .* db) .^ (2) .* ka .^ (4) .* kb .^ (4) .+ ka .^ (4) .* kb .^ (4))) ./ (ka .^ (4) .* tan.(kb .* db) .^ (2) .+ (2) .* ka .^ (2) .* kb .^ (2) .* tan.(kb .* db) .^ (2) .+ kb .^ (4) .* tan.(kb .* db) .^ (2) .+ (4) .* ka .^ (2) .* kb .^ (2)));
 
-    aj1 = [0, pi, 2*pi, 3*pi, 4*pi];
+    aj1 = [0, 2*pi, 4*pi, 6*pi];
     An11 = SharedArray{Float64}(length(w), length(aj1));
     An12 = SharedArray{Float64}(length(w), length(aj1));
     rr1 = CartesianIndices(size(An11));
-    aj2 = [0, pi, 2*pi, 3*pi, 4*pi];
+    aj2 = [0, 2*pi, 4*pi, 6*pi];
     An21 = SharedArray{Float64}(length(w), length(aj2));
     An22 = SharedArray{Float64}(length(w), length(aj2));
     rr2 = CartesianIndices(size(An21));
@@ -151,43 +319,48 @@ function PCLs(da, db, na, nb, w, dx)
     end
     k_2 = Bn[1:num1, 1]; k_1 = Bn[1:num1, 2]; k1 = Bn[1:num1, 3]; k2 = Bn[1:num1, 4]; k0 = ones(num1) * (D / 2);
 
-    p110 = An11[1:num1, 1]; p111 = An11[1:num1, 2]; p112 = An11[1:num1, 3]; p113 = An11[1:num1, 4]; p114 = An11[1:num1, 5];
-    p120 = An12[1:num1, 1]; p121 = An12[1:num1, 2]; p122 = An12[1:num1, 3]; p123 = An12[1:num1, 4]; p124 = An12[1:num1, 5];
+    p110 = An11[1:num1, 1]; p112 = An11[1:num1, 2]; p114 = An11[1:num1, 3]; p116 = An11[1:num1, 4];
+    p120 = An12[1:num1, 1]; p122 = An12[1:num1, 2]; p124 = An12[1:num1, 3]; p126 = An12[1:num1, 4];
 
-    p210 = An21[1:num1, 1]; p211 = An21[1:num1, 2]; p212 = An21[1:num1, 3]; p213 = An21[1:num1, 4]; p214 = An21[1:num1, 5];
-    p220 = An22[1:num1, 1]; p221 = An22[1:num1, 2]; p222 = An22[1:num1, 3]; p223 = An22[1:num1, 4]; p224 = An22[1:num1, 5];
+    p210 = An21[1:num1, 1]; p212 = An21[1:num1, 2]; p214 = An21[1:num1, 3]; p216 = An21[1:num1, 4];
+    p220 = An22[1:num1, 1]; p222 = An22[1:num1, 2]; p224 = An22[1:num1, 3]; p226 = An22[1:num1, 4];
 
-    dataA1 = [p110, p112, p114, p120, p122, p124];
-    dataA2 = [p210, p212, p214, p220, p222, p224];
+    dataA1 = [p110, p112, p114, p116, p120, p122, p124, p126];
+    dataA2 = [p210, p212, p214, p216, p220, p222, p224, p226];
     dataB = [k0, k1, k_1, k2, k_2];
     dataPCLs = [dataA1, dataA2, dataB] * 1e9;
 end
 
 # 输入参数
 Arg = nothing; dx = nothing; r0 = nothing; w = nothing; dataPCLs = nothing; f1 = nothing; f2 = nothing;
-da = 100e-9; db = 100e-9; lc = da;  # 单位m
-na = 3.2;  # slab A
-nb = 1;  # slab B
+da = 100e-9; db = 100e-9; lc = da / 2;  # 单位m
+na = 3.5;  # slab A
+nb = 2;  # slab B
 nc = 2;
-w = 0.001:0.01:15;
-dx = 0:0.1*1e-9:da + db;
-
+#w = 0.00001:0.001:5;
+w = 1:0.000001:2
+#dx = 0:0.1e-9:da+db;
+dx = 100e-9;
+yeta = 0;
 # 函数运算
-@time r0, Arg = ABA(da, db, lc, na, nb, nc, w, dx)  # 计算ABA结构+共振柱的反射系数和反射相位
-@time dataPCLs = PCLs(da, db, na, nb, w, dx)　　#　计算ABA结构+共振柱的相位切割线
-
+@time r0, Arg = ABA(da, db, lc, na, nb, nc, w, dx, yeta)  # 计算ABA结构+共振柱的反射系数和反射相位
+#@time dataPCLs = PCLs(da, db, na, nb, w, dx)　　#　计算ABA结构+共振柱的相位切割线
+#r0, Arg = interface(da, db, lc1, lc2, na, nb, nc, w, dx, yeta)
+r0, Arg = interface(da, db, lc, na, nb, nc, w, dx, yeta)
 # 画图
-
-heatmap(dx * 1e9, w, Arg', color = :bluesreds, dpi = 600,
+plot(w, r0',title = L"(a)",xlabel = L"f\, (10^{15}/ 2 \pi\ Hz)", ylabel = L"|r|", dpi = 600,legend = :none)
+#plot(w,[Arg1[1000,:],Arg2[1000,:]],xlabel =L"f\, (10^{15}/ 2 \pi\ Hz)",ylabel = L"\phi",label=[L"\phi_R",L"\phi_L"],legend = :bottomleft ,dpi = 600)
+#Arg1 = Arg;
+f1 = heatmap(dx * 1e9, w, Arg', color = :bluesreds, dpi = 600,
 title = L"Arg(r)",
 ylabel = L"f\, (10^{15}/ 2 \pi\ Hz)",
 xlabel = L"\Delta (nm)")
-f1 = plot!(dataPCLs, w, legend = :none,  line = (:dot, 1.5));
+#f1 = plot!(dataPCLs, w, legend = :none,  line = (:dot, 1.5));
 
-heatmap(dx * 1e9, w, r0', color = :bluesreds, dpi=600,
+f2 = heatmap(dx * 1e9, w, r0', color = :bluesreds, dpi=600,
 title = L"|r|",
 xlabel = L"\Delta (nm)")
-f2 = plot!(dataPCLs, w, legend = :none,  line=(:dot, 1.5))
+#f2 = plot!(dataPCLs, w, legend = :none,  line=(:dot, 1.5))
 
 plot(f1, f2, layout = (1, 2))
-savefig("test.html")
+#savefig("E:\\XLL\\OneDrive - email.ncu.edu.cn\\FDU\\topological\\manuscript\\image\\da_100_db_100_lc_50_na_2_nb_5_nc_2.png")

@@ -8,6 +8,8 @@ function E_file(da, db, lc, na, nb, nc, w, dx)
     ka = w * 1e15 * na / c;
     kb = w * 1e15 * nb / c;
     kc = w * 1e15 * nc / c;
+    ω₀ = c * pi / (2 * nc * lc);
+    Δω = w .- ω₀;
     if dx <= da/2
         z1 = 0:0.1e-9:dx;
         z2 = dx:0.1e-9:da/2;
@@ -62,6 +64,7 @@ function E_file(da, db, lc, na, nb, nc, w, dx)
         n = [1 1; kb -kb];
         o = [exp(im*kb*(dx-da/2)) exp(-im*kb*(dx-da/2)); kb*exp(im*kb*(dx-da/2)) -kb*exp(-im*kb*(dx-da/2))];
         p = [1 1;kc -kc];
+        #q = [1+im*tan(kc[nn]*lc)/2/(w[nn] + im * yeta) im*tan(kc[nn]*lc)/2/(w[nn] + im * yeta); -im*tan(kc[nn]*lc)/2/(w[nn] + im * yeta) 1-im*tan(kc[nn]*lc)/2/(w[nn] + im * yeta)];
         q = [1+im*tan(kc*lc)/2 im*tan(kc*lc)/2; -im*tan(kc*lc)/2 1-im*tan(kc*lc)/2];
         r = [1 1; kc -kc];
         s = [1 1; kb -kb];
@@ -107,6 +110,7 @@ function E_file(da, db, lc, na, nb, nc, w, dx)
         p = [1 1; ka -ka];
         q = [exp(im*ka*(dx-da/2-db)) exp(-im*ka*(dx-da/2-db)); ka*exp(im*ka*(dx-da/2-db)) -ka*exp(-im*ka*(dx-da/2-db))];
         r = [1 1; kc -kc];
+        #s = [1+im*tan(kc[nn]*lc)/2/(w[nn] + im * yeta) im*tan(kc[nn]*lc)/2/(w[nn] + im * yeta); -im*tan(kc[nn]*lc)/2/(w[nn] + im * yeta) 1-im*tan(kc[nn]*lc)/2/(w[nn] + im * yeta)];
         s = [1+im*tan(kc*lc)/2 im*tan(kc*lc)/2; -im*tan(kc*lc)/2 1-im*tan(kc*lc)/2];
         t = [1 1; kc -kc];
         u = [1 1; ka -ka];
@@ -150,12 +154,15 @@ na = 3.2;  # slab A
 nb = 1;  # slab B
 nc = 2;
 
-dx = 44.33e-9;
-w = 11.58;
-#[5.46, 11.45]; [31.11, 11.43]; [58.19, 11.27];[194.5, 11.46];
-
-
+dx = 11.54e-9;
+w = 12.66;
+#band8上界面:[5.46, 11.45]; [31.11, 11.43]; [58.19, 11.27];[100, 11.62]; [141.8 11.27]; [168.9, 11.43]; [194.5, 11.45];
+#band8下界面:[2.217, 10.96]; [29.14, 10.97]; [56.37, 10.8]; [100, 11.57];[143.6, 10.8]; [170.8, 10.98];[197.9, 10.95]
+#band9下界面:[9.342, 12.17]; [14.98, 12.2]; [33.36, 12.21]; [39.13, 12.21]; [61.84, 12.35];[100, 13.01];[138.1 12.36];[160.9,12.2];[166.4,12.18];[185,12.2];[190.7, 12.17]
+#band9上界面:[11.2, 12.58]; [16.85, 12.78]; [34.73, 12.63]; [39.95, 12.82];[62.75, 12.65];[100,13.46]
+#[16.85,5.18],[23.46,6.2],[32.59,6.01],[28.28,5.24],[100,5.02],[100,5.69]
 z, dataE = E_file(da, db, lc, na, nb, nc, w, dx)
-plot(z .* 1e9, dataE, legend = :none,
+plot(z .* 1e9, dataE, legend = :none, dpi = 600,
 ylabel = L"E(x)",
-xlabel = L"\Delta (nm)")
+xlabel = L"x (nm)")
+savefig("E:\\OneDrive - email.ncu.edu.cn\\FDU\\topological\\manuscript\\image\\A1_4pi_9band_up.png")

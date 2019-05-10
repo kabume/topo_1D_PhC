@@ -7,9 +7,9 @@ gr()
 #pyplot()
 Arg=nothing;dx=nothing;dx0=nothing;ka=nothing;kb=nothing;kc=nothing;p11=nothing;p12=nothing;r0=nothing;rr=nothing;w=nothing;
 
-#addprocs(72)#除了第一次运行，下次运行的时候要注释掉
+addprocs(8)#除了第一次运行，下次运行的时候要注释掉
 
-da=100e-9;db=100e-9;D=da+db;lc=da;#单位m
+da=100e-9;db=100e-9;D=da+db;lc=da/2;#单位m
 Dt=D*1e9;
 dx0=0:0.1:Dt;
 dx=dx0*1e-9
@@ -17,7 +17,7 @@ na=3.2;#slab A
 nb=1;#slab B
 nc=2;
 c=3e8;
-w=0.1:0.01:15;
+w=9:0.01:14;
 ka=w*1e15*na/c;
 kb=w*1e15*nb/c;
 kc=w*1e15*nc/c;
