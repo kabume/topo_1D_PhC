@@ -22,8 +22,8 @@ figure
 colormap(jet);
 imagesc(dx0,w,r0');
 set(gca,'YDir','normal');  
-title("|r| of semiinfinite")
-xlabel("\Delta(nm)");ylabel("\omega(10^{15} Hz)");
+title('|r| of semiinfinite')
+xlabel('\Delta(nm)');ylabel('\omega(10^{15} Hz)');
 hold on
 PCLs(da, db, na, nb, w);
 hold off
@@ -31,8 +31,8 @@ figure
 colormap(jet);
 imagesc(dx0,w,Arg');
 set(gca,'YDir','normal');
-title("Arg of semiinfinite")
-xlabel("\Delta(nm)");ylabel("\omega(10^{15} Hz)");
+title('Arg of semiinfinite')
+xlabel('\Delta(nm)');ylabel('\omega(10^{15} Hz)');
 hold on 
 PCLs(da, db, na, nb, w);
 hold off

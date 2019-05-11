@@ -35,7 +35,7 @@ function PCLs(da, db, na, nb, w)
     
     figure
     plot(p110, w, 'r',p112, w, 'g--', p114, w, 'b:', p120, w, 'r', p122, w,'g--', p124, w, 'b:', 'LineWidth',2);
-    legend("0", "pi", "2pi")
+    legend('0', 'pi', '2pi')
     hold on
     plot(p210, w, 'r',p212, w, 'g--', p214, w, 'b:', p220, w, 'r', p222, w,'g--', p224, w, 'b:', 'LineWidth',2);
     plot(k0, w, 'k', k1, w, 'g--', k_1, w, 'g--', k2, w,'b:', k_2, w, 'b:', 'LineWidth',2);

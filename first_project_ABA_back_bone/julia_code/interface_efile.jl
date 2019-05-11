@@ -2,7 +2,6 @@
 using Plots
 using LaTeXStrings
 gr()
-#plotly()
 function E_file(da, db, lc, na, nb, nc, w, dx)
     yeta = 0;
     c = 3e8;
@@ -181,7 +180,7 @@ nc = 2;
 
 dx = 100e-9;
 #w = 1.557087;
-w = 4;
+w = 3;
 z, dataE = E_file(da, db, lc, na, nb, nc, w, dx)
 plot(z .* 1e9, dataE, legend = :none, dpi = 600,
 ylabel = L"E(x)",
